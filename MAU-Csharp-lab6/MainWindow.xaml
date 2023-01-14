@@ -1,0 +1,87 @@
+﻿<Window x:Class="MAU_Csharp_lab6.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MAU_Csharp_lab6"
+        mc:Ignorable="d" 
+        
+        Title="MainWindow" Height="500" Width="800">
+
+    <!-- Set ViewModel -->
+    <Window.DataContext>
+        <local:ViewModel/>
+    </Window.DataContext>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static ApplicationCommands.Close}"
+                        Executed="ExecutedCloseCommand"
+                        CanExecute="CanExecuteCloseCommand" />
+        <CommandBinding Command="{x:Static ApplicationCommands.Save}"
+                        Executed="ExecutedSaveCommand"
+                        CanExecute="CanExecuteSaveCommand" />
+        <CommandBinding Command="{x:Static ApplicationCommands.Open}"
+                        Executed="ExecutedOpenCommand"
+                        CanExecute="CanExecuteOpenCommand" />
+        <CommandBinding Command="{x:Static ApplicationCommands.New}"
+                        Executed="ExecutedNewCommand"
+                        CanExecute="CanExecuteNewCommand" />
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Command="Close" Key="Q" Modifiers="Ctrl" />
+    </Window.InputBindings>
+
+    <StackPanel>
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="New" Command="New" /> 
+                <Separator />
+                <MenuItem Header ="Open data file" Command="Open" />
+                <MenuItem Header="Save data file" Command="Save" />
+                <Separator />
+
+                <MenuItem Header="Exit" Command="Close" InputGestureText="Ctrl+Q" />                
+            </MenuItem>
+            <MenuItem Header="Help" >
+                <MenuItem Header="About..."/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Date, time and priority -->
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <DatePicker x:Name="dp_date" Width="110"/>
+            <Label Content="Time" Margin="10,0,0,0"/>
+            <ComboBox Width="80" SelectedItem="08:00" ItemsSource="{Binding Times}" />
+            <Label Content="Priority" />
+            <ComboBox x:Name="cbx_priority" Width="100" SelectedItem="Normal" ItemsSource="{Binding Priority}" />
+        </StackPanel>
+
+        <!-- To do -->
+        <StackPanel Orientation="Horizontal" Height="25" Margin="10">
+            <Label Content="To do" />
+            <TextBox x:Name="tbx_toDo" Width="300"/>
+        </StackPanel>
+
+        <!-- Add button -->
+        <Button x:Name="btn_add" Content="Add" Height="25" Width="70" HorizontalAlignment="Left" Margin="200,10" />
+
+        <GroupBox Header="To do" Grid.Row="4" Grid.Column="1">
+            <StackPanel Grid.Row="4" Grid.Column="1">
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Date"/>
+                    <Label Content="Hour" />
+                    <Label Content="Priority" />
+                    <Label Content="Description" />
+                </StackPanel>
+                <ListBox x:Name="lbx_toDoList" Width="750" Height="200" HorizontalAlignment="Left"/>
+            </StackPanel>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="btn_change" Content="Change" Width="80" Height="25" Margin="50,5"/>
+            <Button x:Name="btn_Delete" Content="Delete" Width="80" Height="25" />
+
+        </StackPanel>
+    </StackPanel>
+</Window>
