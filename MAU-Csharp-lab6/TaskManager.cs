@@ -2,8 +2,7 @@
 {
     private List<Task> allTasks;
     private List<string> taskAsFileText;
-
-    public List<string> TaskAsFileText { get { return taskAsFileText; } }
+    //public List<string> TaskAsFileText { get { return taskAsFileText; } }
     public TaskManager()
     {
         allTasks = new List<Task>();
@@ -157,7 +156,7 @@
 
 
     /// <summary>
-    /// Creates a string list and calls a method to convert each task to a string
+    /// Creates a string list and calls a method to convert each task to a string.
     /// </summary>
     /// <returns>A list of strings representing all the tasks as strings.</returns>
     public List<string> GetAllTasksAsList()
@@ -172,6 +171,4 @@
         }
         return allTasksAsList;
     }
-
-
  }

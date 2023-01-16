@@ -5,11 +5,8 @@
     private PriorityType pt;  
     private string toDoText;
     public string ToDoText { get { return toDoText; } set { toDoText = value; } }
-
     public DateTime TaskDateAndTime { get { return taskDateAndTime; } }
-
     public string Time { get { return time; } }
-
     public PriorityType Pt { get { return pt; } set { pt = value; } }
 
 
