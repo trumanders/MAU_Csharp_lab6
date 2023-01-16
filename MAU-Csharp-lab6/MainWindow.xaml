@@ -11,16 +11,25 @@
         mc:Ignorable="d"        
         ResizeMode="NoResize"
         Title="MainWindow" Height="500" Width="800"
-        Icon="app.ico">
+        >
 
     <Window.Resources>
+
+        <!-- Enum binding -->
         <ObjectDataProvider x:Key="enumPriorityType" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="local:PriorityType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <!-- Tooltip duration -->
+        <Style TargetType="DatePicker">
+            <Setter Property="ToolTipService.InitialShowDelay" Value="200">
+
+            </Setter>
+        </Style>
     </Window.Resources>
-    
+
     <!-- Set ViewModel -->
     <Window.DataContext>
         <local:ViewModel/>
@@ -33,6 +42,9 @@
         <CommandBinding Command="{x:Static ApplicationCommands.Save}"
                         Executed="ExecutedSaveCommand"
                         CanExecute="CanExecuteSaveCommand" />
+        <CommandBinding Command="{x:Static ApplicationCommands.SaveAs}"
+                        Executed="ExecutedSaveAsCommand"
+                        CanExecute="CanExecuteSaveAsCommand" />
         <CommandBinding Command="{x:Static ApplicationCommands.Open}"
                         Executed="ExecutedOpenCommand"
                         CanExecute="CanExecuteOpenCommand" />
@@ -43,27 +55,29 @@
 
     <Window.InputBindings>
         <KeyBinding Command="Close" Key="Q" Modifiers="Ctrl" />
+        <KeyBinding Command="SaveAs" Gesture="Ctrl+Shift+S" />
     </Window.InputBindings>
 
     <StackPanel>
         <Menu>
             <MenuItem Header="File">
-                <MenuItem Header="New" Command="New" /> 
+                <MenuItem Header="New" Command="New" />
                 <Separator />
                 <MenuItem Header ="Open data file" Command="Open" />
                 <MenuItem Header="Save data file" Command="Save" />
+                <MenuItem Header="Save as..." Command="SaveAs" />
                 <Separator />
 
-                <MenuItem Header="Exit" Command="Close" InputGestureText="Ctrl+Q" />                
+                <MenuItem Header="Exit" Command="Close" InputGestureText="Ctrl+Q" />
             </MenuItem>
             <MenuItem Header="Help" >
-                <MenuItem Header="About..."/>
+                <MenuItem Header="About..." Click="MenuItem_About_Click"/>
             </MenuItem>
         </Menu>
 
         <!-- Date, time and priority -->
         <StackPanel Orientation="Horizontal" Margin="10">
-            <DatePicker x:Name="dp_date" Width="110" SelectedDateChanged="dp_DateChanged"/>
+            <DatePicker x:Name="dp_date" Width="110" SelectedDateChanged="dp_DateChanged" ToolTip="Click to open calendar."/>
             <Label Content="Time" Margin="10,0,0,0"/>
             <ComboBox x:Name="cbx_time" Width="80" SelectedItem="08:00" ItemsSource="{Binding Times}" />
             <Label Content="Priority" />
@@ -81,7 +95,7 @@
             <Label x:Name="lbl_info" Width="170" Foreground="Red" Margin="40,0"/>
             <Button x:Name="btn_add" Content="Add" Height="25" Width="70" HorizontalAlignment="Left" Click="btn_Add_Click"/>
         </DockPanel>
-        
+
 
         <GroupBox Header="To do-list" Grid.Row="4" Grid.Column="1" Margin="10">
             <StackPanel Grid.Row="4" Grid.Column="1" Margin="7">
@@ -98,6 +112,7 @@
         <StackPanel Orientation="Horizontal">
             <Button x:Name="btn_change" Content="Change" Width="80" Height="25" Margin="50,5" Click="btn_Change_Click"/>
             <Button x:Name="btn_delete" Content="Delete" Width="80" Height="25" Click="btn_Delete_Click" />
+            <TextBlock Margin="400,0" FontSize="20" Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='hh:mm:ss'}" />
 
         </StackPanel>
     </StackPanel>

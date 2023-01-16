@@ -1,5 +1,4 @@
 ﻿namespace MAU_Csharp_lab6;
-
 public class ViewModel
 {
     public string[] Times { get; private set; }

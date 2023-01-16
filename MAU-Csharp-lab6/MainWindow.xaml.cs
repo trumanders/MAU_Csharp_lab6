@@ -1,11 +1,4 @@
-﻿using Microsoft.Win32;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.IO;
-using System.Windows.Controls;
-using System.Linq;
-using MAU_Charp_lab6;
+﻿using MAU_Charp_lab6;
 
 namespace MAU_Csharp_lab6;
 
@@ -14,15 +7,17 @@ namespace MAU_Csharp_lab6;
 /// </summary>
 public partial class MainWindow : Window
 {
-    TaskManager taskManager;
-    Task currentTask;
+    private TaskManager taskManager;
+    private FileManager fileManager;
+    private bool isSaved;
     public MainWindow()
     {
-        InitializeComponent();
-        ResetGUI();
+        InitializeComponent();        
         ViewModel viewModel = new ViewModel();
         taskManager = new TaskManager();
-        currentTask = new Task();
+        fileManager = new FileManager(taskManager);
+        ResetGUI();
+
     }
 
 
@@ -38,8 +33,8 @@ public partial class MainWindow : Window
         cbx_priority.SelectedIndex = 2;
         tbx_toDo.Text = null;
         lbx_toDoList.ItemsSource = null;
-        lbl_info.Content = "Please enter all requied info";
-        
+        lbl_info.Content = "Please enter all requied info";        
+        isSaved = false;       
     }
 
 
@@ -57,7 +52,12 @@ public partial class MainWindow : Window
     }
 
 
-
+    /// <summary>
+    /// Performs actions when the change-button is clicked. Grabs the index
+    /// of the selected item in the list box and calls the AddOrChange method. Updates the UI.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void btn_Change_Click(object sender, RoutedEventArgs e)
     {
         int index = lbx_toDoList.SelectedIndex;
@@ -66,13 +66,29 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    /// Deletes the selected task in the list box and updates the UI.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void btn_Delete_Click(object sender, RoutedEventArgs e)
     {
-        taskManager.DeleteTask(lbx_toDoList.SelectedIndex);
-        UpdateListBox();
+        MessageBoxResult mbr = MessageBox.Show("Are you sure?", "Delete task", MessageBoxButton.OKCancel);
+        if (mbr == MessageBoxResult.OK)
+        {
+            taskManager.DeleteTask(lbx_toDoList.SelectedIndex);
+            ResetGUI();
+            UpdateListBox();
+        }        
     }
 
 
+    /// <summary>
+    /// Performs actions when the priority combobox is changed and enables the buttons
+    /// accordingly. 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void cbx_PriorityChanged(object sender, RoutedEventArgs e)
     {
         // Call the toggle method and pass in the boolean result of CheckForRequired-method
@@ -80,12 +96,24 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    /// Performs actions when the todo-textbox is changed, and enables/disables the
+    /// buttons accordingly.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void tbx_TodoChanged(object sender, RoutedEventArgs e)
     {
         ToggleAddButtonAndWarningText(CheckForRequired());
     }
 
 
+    /// <summary>
+    /// Performs actions when the datepicker is changed, and enables/disables the
+    /// buttons accordingly.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void dp_DateChanged(object sender, RoutedEventArgs e)
     {
         ToggleAddButtonAndWarningText(CheckForRequired());
@@ -129,7 +157,12 @@ public partial class MainWindow : Window
     }
 
 
-    // Menu - New
+    /// <summary>
+    /// Performs actions when New is selected in the menu. Clears all tasks and
+    /// resets the UI.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ExecutedNewCommand(object sender, ExecutedRoutedEventArgs e)
     {
         if (taskManager != null)
@@ -137,26 +170,42 @@ public partial class MainWindow : Window
             taskManager.ClearTasks();
         }
         ResetGUI();
-        // New code
     }
 
 
+    /// <summary>
+    /// Enables the new command.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void CanExecuteNewCommand(object sender, CanExecuteRoutedEventArgs e)
     {
         e.CanExecute = true;
     }
 
 
-    // Menu - Open
+    /// <summary>
+    /// Performs actions when Open is selected in the menu. Calls the Read method in the
+    /// task manager.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ExecutedOpenCommand(object sender, ExecutedRoutedEventArgs e)
-    {        
-        FileManager fileManager = new FileManager(taskManager);
+    {
         if (fileManager.Read())
+        {
             ResetGUI();
-        UpdateListBox();
+            UpdateListBox();
+            isSaved = true;
+        }
     }
 
 
+    /// <summary>
+    /// Enables the open command.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void CanExecuteOpenCommand(object sender, CanExecuteRoutedEventArgs e)
     {
         e.CanExecute = true;
@@ -181,6 +230,11 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    /// Enables the Close command
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void CanExecuteCloseCommand(object sender, CanExecuteRoutedEventArgs e)
     {
         e.CanExecute = true;
@@ -195,12 +249,48 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void ExecutedSaveCommand(object sender, ExecutedRoutedEventArgs e)
     {
-        FileManager fileManager = new FileManager(taskManager);
-        fileManager.Save();        
+        // If the user has not saved at least once, the save as method is called
+        if (isSaved)
+        {
+            fileManager.Save();
+        }
+        else
+        {
+            ExecutedSaveAsCommand(sender, e);
+        }
     }
 
 
+    /// <summary>
+    /// Enables the Save command
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void CanExecuteSaveCommand(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = true;
+    }
+
+
+    /// <summary>
+    /// Performs actions when Save AS... is selected in the menu. Calls the SaveAs-mehtod in the
+    /// task manager.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void ExecutedSaveAsCommand(object sender, ExecutedRoutedEventArgs e)
+    {        
+        fileManager.SaveAs();
+        isSaved = true;
+    }
+
+
+    /// <summary>
+    /// Enables the Save as command.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void CanExecuteSaveAsCommand(object sender, CanExecuteRoutedEventArgs e)
     {
         e.CanExecute = true;
     }
@@ -235,13 +325,20 @@ public partial class MainWindow : Window
             lbl_info.Foreground = Brushes.Green;
         }
     }
-
-
     
 
+    /// <summary>
+    /// Sets the item source of the list box to show all in memory tasks.
+    /// </summary>
     private void UpdateListBox()
     {
         lbx_toDoList.ItemsSource = null;
         lbx_toDoList.ItemsSource = taskManager.GetAllTasksAsList();
+    }
+
+
+    private void MenuItem_About_Click(object sender, RoutedEventArgs e)
+    {        
+        
     }
 }

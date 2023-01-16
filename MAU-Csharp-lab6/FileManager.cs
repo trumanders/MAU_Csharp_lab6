@@ -1,68 +1,96 @@
-﻿using System.Linq;
-using System.Windows;
-
-namespace MAU_Charp_lab6;
+﻿namespace MAU_Charp_lab6;
 
 public class FileManager
 {
     private const string FILE_ID = "7904255556ToDoList";
     private TaskManager taskManager;
     private string numberOfTasks;
-    private List<string> tasksAsFileText = new List<string>();  
+    
+    private string filename;
+    public string FileName { get { return filename; } }
+
 
     public FileManager(TaskManager taskManager)
     {
-        this.taskManager = taskManager;
-        this.numberOfTasks = taskManager.GetNumberOfTasks().ToString();        
+        this.taskManager = taskManager;                
+        filename = null;
+    }
+
+    /// <summary>
+    /// Save the tasks to file if the file already is opened.
+    /// </summary>
+    /// <returns>True if save was successful, otherwise false.</returns>
+    public bool Save()
+    {
+        // Save the existing file
+        try
+        {
+            File.WriteAllLines(this.filename, taskManager.GetTasksAsFileText());
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("" + ex.ToString());
+            return false;
+        }
+        
+        return true;
     }
 
 
-    public bool Save()
+    /// <summary>
+    /// Save the tasks to a new file. This method is called from Save() if there is no opened file yet.
+    /// </summary>
+    /// <returns>True if save as was successful, otherwise false.</returns>
+    public bool SaveAs()
     {
-        tasksAsFileText.Add("7904255556ToDoList");
-        tasksAsFileText.Add(numberOfTasks);
-
         SaveFileDialog sfd = new SaveFileDialog();
         sfd.Filter = "Text Files (*.txt)|*.txt";
         sfd.DefaultExt = "txt";
         if (sfd.ShowDialog() == true)
         {
-            // Save 4 lines per task            
-            File.WriteAllLines(sfd.FileName, GetTasksAsFileText());
+            try
+            {
+                File.WriteAllLines(sfd.FileName, taskManager.GetTasksAsFileText());
+            }
+            catch(Exception ex) 
+            {
+                MessageBox.Show("" + ex.ToString());
+                return false;
+            }            
         }
+        this.filename = sfd.FileName;
         return true;
     }
 
 
+    /// <summary>
+    /// Read all tasks from a text file containing all the task objects' data.
+    /// Checks if the file is valid. Then splits each line (task) into separate strings
+    /// and converts them to Task object data. Then creates the task object.
+    /// </summary>
+    /// <returns>True if read was successful, otherwise false.</returns>
     public bool Read()
     {        
         OpenFileDialog ofd = new OpenFileDialog();
         ofd.Filter = "Text Files (*.txt)|*.txt";
         if (ofd.ShowDialog() == true)
-        {
-            string firstLine = File.ReadLines(ofd.FileName).First();
-            string secondLine = File.ReadLines(ofd.FileName).Skip(1).Take(1).First();
-            if (firstLine != FILE_ID || !Int32.TryParse(secondLine, out int num))
-            {
-                MessageBox.Show("Incompatible file");
+        {      
+            if (!isFileCompatible(ofd))
                 return false;
-            }
-            
-            int numOfLines = Convert.ToInt32(File.ReadLines(ofd.FileName).Skip(1).Take(1).First());
-            if (numOfLines < 1)
-            {
-                MessageBox.Show("There are no tasks in the file");
-                return false;
-            }
 
             taskManager.ClearTasks();
-            for (int i = 0; i < numOfLines; i++)
+
+            int numOfLinesInFile = Convert.ToInt32(File.ReadLines(ofd.FileName).Skip(1).Take(1).First());
+
+            // Iterate through each line (task), split each line into a string array with the different data
+            // as separate elements. Call the add task method and pass in the data as the correct types.
+            for (int i = 0; i < numOfLinesInFile; i++)
             {
                 Task t = new Task();
                 string line = File.ReadLines(ofd.FileName).Skip(2+i).Take(1).First();
                 string[] taskStr = line.Split("_");
-
-                //string dayLetters = taskStr[0];
+                
+                // Skip the name of the day of the week (taskStr[0]), it can be generated using the other date-data.
                 string dayDigits = taskStr[1];
                 string monthDigits= taskStr[2];
                 string yearDigits = taskStr[3];
@@ -76,51 +104,43 @@ public class FileManager
                 //MessageBox.Show("Priority: " + priority + "year: " + yearDigits + "month: " + monthDigits + "day: " + dayDigits + "hour: " + hoursDigits + "minutes: " + minutesDigits);
                 int priorityIndex = Convert.ToInt32(priority);
                 DateTime dt = new DateTime(Convert.ToInt32(yearDigits), Convert.ToInt32(monthDigits), Convert.ToInt32(dayDigits));
+
                 taskManager.AddOrChangeTask(dt, time, priorityIndex, toDoText, -1);
+                this.filename = ofd.FileName;
             }            
         }
         return true;
     }
 
-
-    private List<string> GetTasksAsFileText()
+    /// <summary>
+    /// Check if the file is compatible with the progra. It checks for a uniqu File ID (first line), and 
+    /// checks whether the number of lines info is valid. The number of lines info must be on the second line and 
+    /// not negative.
+    /// </summary>
+    /// <param name="ofd">The OpenFileDialog object to check.</param>
+    /// <returns>True if file is compatible, otherwise false.</returns>
+    private bool isFileCompatible(OpenFileDialog ofd)
     {
-        /* Iterate through all tasks and save each task as a string (line) of text. The data in the task is
-           separated by '_' */
-       
-        for (int i = 0; i < taskManager.GetNumberOfTasks(); i++)
+        if (!File.Exists(ofd.FileName))
         {
-            string taskString = "";
-            Task t = taskManager.GetOneTask(i);
+            MessageBox.Show("The file does not exist.");
+            return false;
+        }            
 
-            // Add day string (Friday) 
-            taskString += t.TaskDateAndTime.Date.ToString("dddd") + "_";
+        string fileID = File.ReadLines(ofd.FileName).First();
+        string numOfLinesInFile = File.ReadLines(ofd.FileName).Skip(1).Take(1).First();
 
-            // Add day of month (21) string
-            string dayOneOrTwoDigits = t.TaskDateAndTime.Date.ToString("dd") + "_";
-            if (dayOneOrTwoDigits[0] == '0')
-                dayOneOrTwoDigits = dayOneOrTwoDigits.Remove(0,1);
-            taskString += dayOneOrTwoDigits;
-
-            // Add month digits string
-            taskString += t.TaskDateAndTime.Date.ToString("MM") + "_";
-
-            // Add year (2023) string
-            taskString += t.TaskDateAndTime.Date.ToString("yyyy") + "_";
-
-            // Add hour string (09)
-            taskString += t.TaskDateAndTime.ToString("HH") + "_";
-
-            // Add minute string (59)
-            taskString += t.TaskDateAndTime.ToString("mm") + "_";
-
-            // Add priority string
-            taskString += ((int)t.Pt).ToString() + "_";  /* Replace the enum string "_" character with space */
-
-            // Add todo string
-            taskString += t.ToDoText + "_";
-            tasksAsFileText.Add(taskString);
+        if (fileID != FILE_ID || !Int32.TryParse(numOfLinesInFile, out int numOfLines) || numOfLines < 0)
+        {
+            MessageBox.Show("Incompatible file");
+            return false;
         }
-        return tasksAsFileText;
-    }     
+        
+        if (numOfLines < 1)
+        {
+            MessageBox.Show("There are no tasks in the file");
+            return false;
+        }
+        return true;
+    }    
 }

@@ -1,16 +1,17 @@
-﻿
-using System.Windows;
-
-public class TaskManager
+﻿public class TaskManager
 {
     private List<Task> allTasks;
+    private List<string> taskAsFileText;
 
+    public List<string> TaskAsFileText { get { return taskAsFileText; } }
     public TaskManager()
     {
         allTasks = new List<Task>();
     }
 
-
+    /// <summary>
+    /// Delete all the tasks in the Task list.
+    /// </summary>
     public void ClearTasks()
     {
         allTasks.Clear();
@@ -25,6 +26,7 @@ public class TaskManager
         return allTasks.Count;
     }
 
+
     /// <summary>
     /// Takes an index and returns the corresponding Task object in the allTasks list.
     /// </summary>
@@ -36,6 +38,63 @@ public class TaskManager
     }
 
 
+    /// <summary>
+    /// Convert the Task list to a string list representing all the tasks.
+    /// </summary>
+    /// <returns>A list of strings representing all the tasks.</returns>
+    public List<string> GetTasksAsFileText()
+    {
+        List<string> tasksAsFileText = new List<string>();
+        tasksAsFileText.Add("7904255556ToDoList");
+        tasksAsFileText.Add(allTasks.Count.ToString());
+
+        /* Iterate through all tasks and save each task as a string (line) of text. The data in the task is
+           separated by '_' */
+
+        for (int i = 0; i < allTasks.Count; i++)
+        {
+            string taskString = "";
+            Task t = allTasks[i];
+
+            // Add day string (Friday) 
+            taskString += t.TaskDateAndTime.Date.ToString("dddd") + "_";
+
+            // Add day of month (21) string
+            string dayOneOrTwoDigits = t.TaskDateAndTime.Date.ToString("dd") + "_";
+            if (dayOneOrTwoDigits[0] == '0')
+                dayOneOrTwoDigits = dayOneOrTwoDigits.Remove(0, 1);
+            taskString += dayOneOrTwoDigits;
+
+            // Add month digits string
+            taskString += t.TaskDateAndTime.Date.ToString("MM") + "_";
+
+            // Add year (2023) string
+            taskString += t.TaskDateAndTime.Date.ToString("yyyy") + "_";
+
+            // Add hour string (09)
+            taskString += t.TaskDateAndTime.ToString("HH") + "_";
+
+            // Add minute string (59)
+            taskString += t.TaskDateAndTime.ToString("mm") + "_";
+
+            // Add priority string
+            taskString += ((int)t.Pt).ToString() + "_";  /* Replace the enum string "_" character with space */
+
+            // Add todo string
+            taskString += t.ToDoText + "_";
+            tasksAsFileText.Add(taskString);
+        }
+        return tasksAsFileText;
+    }
+
+    /// <summary>
+    /// Add a new Task to the Task list or change an existing one.
+    /// </summary>
+    /// <param name="dt">DateTime: The date to assign to the task object.</param>
+    /// <param name="time">string: The time to assign to the task object.</param>
+    /// <param name="priorityIndex">Enum: The priority to assign.</param>
+    /// <param name="toDoText">string: The to-do-text to assign. </param>
+    /// <param name="index">int: If index is negative, the method will add a new Task, otherwise change the Task at the passed in index.</param>
     public void AddOrChangeTask(DateTime dt, string time, int priorityIndex, string toDoText, int index)
     {
         Task task;
@@ -61,9 +120,13 @@ public class TaskManager
     }
 
 
+    /// <summary>
+    /// Delete the task in allTasks list at the passed in index
+    /// </summary>
+    /// <param name="index">Integer: the index of the task to delete.</param>
     public void DeleteTask(int index)
     {
-        allTasks.RemoveAt(index);
+        allTasks.RemoveAt(index);                
     }
 
 

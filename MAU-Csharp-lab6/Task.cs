@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-public class Task
+﻿public class Task
 {    
     private DateTime taskDateAndTime;   /* Contains both date and time */
     private string time;                /* The chosen time as a string */
