@@ -1,4 +1,5 @@
-﻿public enum PriorityType
+﻿namespace MAU_Csharp_lab6; 
+    public enum PriorityType
 {    
     Very_important,
     Important,
