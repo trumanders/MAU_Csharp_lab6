@@ -10,7 +10,7 @@
         
         mc:Ignorable="d"        
         ResizeMode="NoResize"
-        Title="MainWindow" Height="500" Width="800"
+        Title="Anders's To Do Manager" Height="500" Width="800"
         >
 
     <Window.Resources>
@@ -112,7 +112,7 @@
         <StackPanel Orientation="Horizontal">
             <Button x:Name="btn_change" Content="Change" Width="80" Height="25" Margin="50,5" Click="btn_Change_Click"/>
             <Button x:Name="btn_delete" Content="Delete" Width="80" Height="25" Click="btn_Delete_Click" />
-            <TextBlock Margin="400,0" FontSize="20" Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='hh:mm:ss'}" />
+            <Label x:Name="lbl_liveTime" Content="%TIME%" Margin="400,0" FontSize="20" />
 
         </StackPanel>
     </StackPanel>

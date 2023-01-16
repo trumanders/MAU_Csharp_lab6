@@ -1,4 +1,5 @@
 ﻿using MAU_Charp_lab6;
+using System.Windows.Threading;
 
 namespace MAU_Csharp_lab6;
 
@@ -7,9 +8,11 @@ namespace MAU_Csharp_lab6;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private const string WINDOW_TITLE = "Anders's To-Do Manager";
     private TaskManager taskManager;
     private FileManager fileManager;
     private bool isSaved;
+
     public MainWindow()
     {
         InitializeComponent();        
@@ -18,6 +21,17 @@ public partial class MainWindow : Window
         fileManager = new FileManager(taskManager);
         ResetGUI();
 
+        // Live time
+        DispatcherTimer LiveTime = new DispatcherTimer();
+        LiveTime.Interval = TimeSpan.FromSeconds(1);
+        LiveTime.Tick += timer_Tick;
+        LiveTime.Start();
+    }
+
+
+    private void timer_Tick(object sender, EventArgs e)
+    {
+        lbl_liveTime.Content = DateTime.Now.ToString("HH:mm:ss");
     }
 
 
@@ -33,8 +47,7 @@ public partial class MainWindow : Window
         cbx_priority.SelectedIndex = 2;
         tbx_toDo.Text = null;
         lbx_toDoList.ItemsSource = null;
-        lbl_info.Content = "Please enter all requied info";        
-        isSaved = false;       
+        lbl_info.Content = "Please enter all requied info";                
     }
 
 
@@ -169,7 +182,11 @@ public partial class MainWindow : Window
         {
             taskManager.ClearTasks();
         }
+        isSaved = false;
         ResetGUI();
+
+        // Remove filename from window title
+        this.Title = WINDOW_TITLE;
     }
 
 
@@ -194,9 +211,11 @@ public partial class MainWindow : Window
     {
         if (fileManager.Read())
         {
-            ResetGUI();
-            UpdateListBox();
-            isSaved = true;
+            ResetGUI();         /* Clean the field after open file */
+            UpdateListBox();    /* Update the tasks list box */   
+            isSaved = true;     /* Save As... will not be called upon save */
+
+            SetWindowTitleToFileName();
         }
     }
 
@@ -253,6 +272,7 @@ public partial class MainWindow : Window
         if (isSaved)
         {
             fileManager.Save();
+            SetWindowTitleToFileName();
         }
         else
         {
@@ -282,6 +302,7 @@ public partial class MainWindow : Window
     {        
         fileManager.SaveAs();
         isSaved = true;
+        SetWindowTitleToFileName();
     }
 
 
@@ -334,6 +355,12 @@ public partial class MainWindow : Window
     {
         lbx_toDoList.ItemsSource = null;
         lbx_toDoList.ItemsSource = taskManager.GetAllTasksAsList();
+    }
+
+
+    private void SetWindowTitleToFileName()
+    {
+        this.Title = System.IO.Path.GetFileName(fileManager.FileName) + " - " + WINDOW_TITLE;
     }
 
 
