@@ -300,8 +300,9 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void ExecutedSaveAsCommand(object sender, ExecutedRoutedEventArgs e)
     {        
-        fileManager.SaveAs();
-        isSaved = true;
+        if (fileManager.SaveAs())
+            isSaved = true;
+        else isSaved= false;
         SetWindowTitleToFileName();
     }
 

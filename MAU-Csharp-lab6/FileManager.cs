@@ -56,10 +56,11 @@ public class FileManager
             {
                 MessageBox.Show("" + ex.ToString());
                 return false;
-            }            
+            }
+            this.filename = sfd.FileName;
+            return true;
         }
-        this.filename = sfd.FileName;
-        return true;
+        return false;
     }
 
 
